@@ -12,8 +12,15 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const OPENWEATHERMAP_API_KEY = process.env.OPENWEATHERMAP_API_KEY || 'ef173bd6ad884db03a5578c59bd8f978';
 
+// CORS configuration to allow requests from your Vercel frontend
+const corsOptions = {
+  origin: ['https://mosam-weather-for-micro-it.vercel.app', 'http://localhost:5173'],
+  methods: ['GET', 'POST'],
+  credentials: true,
+};
+
 // Middleware
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Weather API endpoint
@@ -82,20 +89,10 @@ app.get('/api/forecast', async (req, res) => {
   }
 });
 
-// For production: Serve frontend static files
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-if (process.env.NODE_ENV === 'production') {
-  // Serve static files from the frontend build directory
-  const staticPath = path.join(__dirname, '../frontend/dist');
-  app.use(express.static(staticPath));
-  
-  // Handle any requests that don't match the API routes
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(staticPath, 'index.html'));
-  });
-}
+// Health check endpoint
+app.get('/', (req, res) => {
+  res.json({ status: 'API is running', message: 'Welcome to Mosam Weather API' });
+});
 
 // Start server
 app.listen(PORT, () => {
